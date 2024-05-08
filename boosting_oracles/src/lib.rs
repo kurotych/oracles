@@ -1,6 +1,7 @@
 pub mod assignment;
 
-use crate::Settings;
+use std::path::PathBuf;
+
 pub use assignment::{Assignment, HexAssignments};
 use hextree::disktree::DiskTreeMap;
 
@@ -14,10 +15,14 @@ pub struct HexBoostData {
     landtype: DiskTreeMap,
 }
 
-pub fn make_hex_boost_data(settings: &Settings) -> anyhow::Result<HexBoostData> {
-    let urban_disktree = DiskTreeMap::open(&settings.urbanization_data_set)?;
-    let footfall_disktree = DiskTreeMap::open(&settings.footfall_data_set)?;
-    let landtype_disktree = DiskTreeMap::open(&settings.landtype_data_set)?;
+pub fn make_hex_boost_data(
+    urbanization_data_set: &PathBuf,
+    footfall_data_set: &PathBuf,
+    landtype_data_set: &PathBuf,
+) -> anyhow::Result<HexBoostData> {
+    let urban_disktree = DiskTreeMap::open(urbanization_data_set)?;
+    let footfall_disktree = DiskTreeMap::open(footfall_data_set)?;
+    let landtype_disktree = DiskTreeMap::open(landtype_data_set)?;
 
     let hex_boost_data = HexBoostData {
         urbanized: urban_disktree,

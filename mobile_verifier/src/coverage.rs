@@ -1,8 +1,9 @@
 use crate::{
-    boosting_oracles::{BoostedHexAssignments, HexAssignments, HexBoostData},
     heartbeats::{HbType, KeyType, OwnedKeyType},
     IsAuthorized, Settings,
 };
+use boosting_oracles::{BoostedHexAssignments, HexAssignments, HexBoostData};
+
 use chrono::{DateTime, Duration, Utc};
 use file_store::{
     coverage::{self, CoverageObjectIngestReport},

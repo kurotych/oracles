@@ -2,10 +2,8 @@ use std::{collections::HashMap, path::PathBuf};
 
 use hextree::disktree::DiskTreeMap;
 
-use crate::{
-    boosting_oracles::{Assignment, Landtype},
-    Settings,
-};
+use crate::Settings;
+use boosting_oracles::{Assignment, Landtype};
 
 #[derive(Debug, clap::Args)]
 pub struct Cmd {

@@ -1,5 +1,4 @@
 use crate::{
-    boosting_oracles,
     coverage::CoverageDaemon,
     data_session::DataSessionIngestor,
     geofence::Geofence,
@@ -11,6 +10,7 @@ use crate::{
     telemetry, Settings,
 };
 use anyhow::Result;
+use boosting_oracles;
 use chrono::Duration;
 use file_store::{
     file_sink,
@@ -148,7 +148,11 @@ impl Cmd {
                     file_upload.clone(),
                     report_ingest.clone(),
                     auth_client.clone(),
-                    boosting_oracles::make_hex_boost_data(settings)?,
+                    boosting_oracles::make_hex_boost_data(
+                        &settings.urbanization_data_set,
+                        &settings.footfall_data_set,
+                        &settings.landtype_data_set,
+                    )?,
                 )
                 .await?,
             )
