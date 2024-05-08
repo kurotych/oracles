@@ -697,7 +697,6 @@ pub fn get_scheduled_tokens_for_oracles(duration: Duration) -> Decimal {
 mod test {
     use super::*;
     use crate::{
-        boosting_oracles::assignment::HexAssignments,
         cell_type::CellType,
         coverage::{CoveredHexStream, HexCoverage, Seniority},
         data_session::{self, HotspotDataSession, HotspotReward},
@@ -707,6 +706,8 @@ mod test {
         speedtests_average::SpeedtestAverage,
         subscriber_location::SubscriberValidatedLocations,
     };
+    use boosting_oracles::{assignment::HexAssignments, Assignment};
+
     use chrono::{Duration, Utc};
     use file_store::speedtest::CellSpeedtest;
     use futures::stream::{self, BoxStream};
@@ -717,6 +718,14 @@ mod test {
     use prost::Message;
     use std::collections::HashMap;
     use uuid::Uuid;
+
+    fn boosting_oracles_assignments_mock() -> HexAssignments {
+        HexAssignments {
+            footfall: Assignment::A,
+            urbanized: Assignment::A,
+            landtype: Assignment::A,
+        }
+    }
 
     #[test]
     fn ensure_correct_conversion_of_bytes_to_bones() {
@@ -1006,7 +1015,7 @@ mod test {
             signal_power: 0,
             coverage_claim_time: DateTime::<Utc>::MIN_UTC,
             inserted_at: DateTime::<Utc>::MIN_UTC,
-            assignments: HexAssignments::test_best(),
+            assignments: boosting_oracles_assignments_mock(),
         }]
     }
 
@@ -1891,7 +1900,7 @@ mod test {
                             coverage_points: CoverageRewardPoints {
                                 boost_multiplier: NonZeroU32::new(1).unwrap(),
                                 coverage_points: dec!(10.0),
-                                hex_assignments: HexAssignments::test_best(),
+                                hex_assignments: boosting_oracles_assignments_mock(),
                                 rank: None,
                             },
                             boosted_hex: BoostedHex {

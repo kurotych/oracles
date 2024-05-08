@@ -1097,9 +1097,18 @@ mod test {
     use std::str::FromStr;
 
     use super::*;
+    use boosting_oracles::Assignment;
     use chrono::NaiveDate;
     use futures::stream::iter;
     use hextree::Cell;
+
+    fn boosting_oracles_assignments_mock() -> HexAssignments {
+        HexAssignments {
+            footfall: Assignment::A,
+            urbanized: Assignment::A,
+            landtype: Assignment::A,
+        }
+    }
 
     /// Test to ensure that if there are multiple radios with different signal levels
     /// in a given hex, that the one with the highest signal level is chosen.
@@ -1134,7 +1143,7 @@ mod test {
                 points: CoverageRewardPoints {
                     coverage_points: dec!(400),
                     boost_multiplier: NonZeroU32::new(1).unwrap(),
-                    hex_assignments: HexAssignments::test_best(),
+                    hex_assignments: boosting_oracles_assignments_mock(),
                     rank: None
                 },
                 boosted_hex_info: BoostedHex {
@@ -1168,7 +1177,7 @@ mod test {
             signal_power: 0,
             coverage_claim_time,
             inserted_at: DateTime::<Utc>::MIN_UTC,
-            assignments: HexAssignments::test_best(),
+            assignments: boosting_oracles_assignments_mock(),
         }
     }
 
@@ -1250,7 +1259,7 @@ mod test {
                 points: CoverageRewardPoints {
                     coverage_points: dec!(400),
                     boost_multiplier: NonZeroU32::new(1).unwrap(),
-                    hex_assignments: HexAssignments::test_best(),
+                    hex_assignments: boosting_oracles_assignments_mock(),
                     rank: None
                 },
                 boosted_hex_info: BoostedHex {
@@ -1294,7 +1303,7 @@ mod test {
                         coverage_points: dec!(16),
                         rank: Some(dec!(1.0)),
                         boost_multiplier: NonZeroU32::new(1).unwrap(),
-                        hex_assignments: HexAssignments::test_best(),
+                        hex_assignments: boosting_oracles_assignments_mock(),
                     },
                     boosted_hex_info: BoostedHex {
                         location: Cell::from_raw(0x8a1fb46622dffff).expect("valid h3 cell"),
@@ -1308,7 +1317,7 @@ mod test {
                         coverage_points: dec!(16),
                         rank: Some(dec!(0.50)),
                         boost_multiplier: NonZeroU32::new(1).unwrap(),
-                        hex_assignments: HexAssignments::test_best(),
+                        hex_assignments: boosting_oracles_assignments_mock(),
                     },
                     boosted_hex_info: BoostedHex {
                         location: Cell::from_raw(0x8a1fb46622dffff).expect("valid h3 cell"),
@@ -1322,7 +1331,7 @@ mod test {
                         coverage_points: dec!(16),
                         rank: Some(dec!(0.25)),
                         boost_multiplier: NonZeroU32::new(1).unwrap(),
-                        hex_assignments: HexAssignments::test_best(),
+                        hex_assignments: boosting_oracles_assignments_mock(),
                     },
                     boosted_hex_info: BoostedHex {
                         location: Cell::from_raw(0x8a1fb46622dffff).expect("valid h3 cell"),
@@ -1593,7 +1602,7 @@ mod test {
             signal_power: 0,
             coverage_claim_time: coverage_claim_time.unwrap_or(DateTime::<Utc>::MIN_UTC),
             inserted_at: DateTime::<Utc>::MIN_UTC,
-            assignments: HexAssignments::test_best(),
+            assignments: boosting_oracles_assignments_mock(),
         }
     }
 
@@ -1611,7 +1620,7 @@ mod test {
             signal_level: SignalLevel::High,
             coverage_claim_time,
             inserted_at: DateTime::<Utc>::MIN_UTC,
-            assignments: HexAssignments::test_best(),
+            assignments: boosting_oracles_assignments_mock(),
         }
     }
 
@@ -1629,7 +1638,7 @@ mod test {
             signal_level: SignalLevel::High,
             coverage_claim_time,
             inserted_at: DateTime::<Utc>::MIN_UTC,
-            assignments: HexAssignments::test_best(),
+            assignments: boosting_oracles_assignments_mock(),
         }
     }
 
@@ -1647,7 +1656,7 @@ mod test {
             signal_level,
             coverage_claim_time,
             inserted_at: DateTime::<Utc>::MIN_UTC,
-            assignments: HexAssignments::test_best(),
+            assignments: boosting_oracles_assignments_mock(),
         }
     }
 }

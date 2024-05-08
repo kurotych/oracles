@@ -1,5 +1,6 @@
 use crate::common;
 use anyhow::Context;
+use boosting_oracles::Assignment;
 use chrono::{DateTime, Duration, Utc};
 use file_store::{
     coverage::RadioHexSignalLevel,
@@ -14,7 +15,6 @@ use helium_proto::services::poc_mobile::{
 };
 use mobile_config::boosted_hex_info::BoostedHexes;
 use mobile_verifier::{
-    boosting_oracles::Assignment,
     coverage::{
         set_oracle_boosting_assignments, CoverageClaimTimeCache, CoverageObject,
         CoverageObjectCache, Seniority, UnassignedHex,
@@ -27,6 +27,7 @@ use mobile_verifier::{
     speedtests_average::{SpeedtestAverage, SpeedtestAverages},
     GatewayResolution, GatewayResolver,
 };
+
 use rust_decimal::Decimal;
 use rust_decimal_macros::dec;
 use sqlx::PgPool;

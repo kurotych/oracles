@@ -96,14 +96,3 @@ impl HexAssignments {
         }
     }
 }
-
-#[cfg(test)]
-impl HexAssignments {
-    pub fn test_best() -> Self {
-        Self {
-            footfall: Assignment::A,
-            urbanized: Assignment::A,
-            landtype: Assignment::A,
-        }
-    }
-}

@@ -1,3 +1,4 @@
+use boosting_oracles::{Assignment, BoostedHexAssignments, HexAssignments};
 use chrono::{DateTime, Utc};
 use file_store::file_sink::{FileSinkClient, Message as SinkMessage};
 use futures::{stream, StreamExt};
@@ -12,7 +13,6 @@ use mobile_config::{
     boosted_hex_info::{BoostedHexInfo, BoostedHexInfoStream},
     client::{hex_boosting_client::HexBoostingInfoResolver, ClientError},
 };
-use mobile_verifier::boosting_oracles::{Assignment, BoostedHexAssignments, HexAssignments};
 use std::collections::HashMap;
 use tokio::{sync::mpsc::error::TryRecvError, time::timeout};
 
