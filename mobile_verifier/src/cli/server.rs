@@ -10,13 +10,13 @@ use crate::{
     telemetry, Settings,
 };
 use anyhow::Result;
-use boosting_oracles;
 use chrono::Duration;
 use file_store::{
     file_sink,
     file_upload::{self},
     FileStore, FileType,
 };
+use hex_assignments;
 
 use mobile_config::client::{
     entity_client::EntityClient, hex_boosting_client::HexBoostingClient, AuthorizationClient,
@@ -148,7 +148,7 @@ impl Cmd {
                     file_upload.clone(),
                     report_ingest.clone(),
                     auth_client.clone(),
-                    boosting_oracles::make_hex_boost_data(
+                    hex_assignments::make_hex_boost_data(
                         &settings.urbanization_data_set,
                         &settings.footfall_data_set,
                         &settings.landtype_data_set,

@@ -1594,18 +1594,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "boosting-oracles"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "helium-proto",
- "hextree",
- "rust_decimal",
- "rust_decimal_macros",
- "sqlx",
-]
-
-[[package]]
 name = "borsh"
 version = "0.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3503,6 +3491,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "hex-assignments"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "helium-proto",
+ "hextree",
+ "rust_decimal",
+ "rust_decimal_macros",
+ "sqlx",
+]
+
+[[package]]
 name = "hex-literal"
 version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4684,7 +4684,6 @@ dependencies = [
  "async-trait",
  "backon",
  "base64 0.21.7",
- "boosting-oracles",
  "chrono",
  "clap 4.4.8",
  "config",
@@ -4696,6 +4695,7 @@ dependencies = [
  "h3o",
  "helium-crypto",
  "helium-proto",
+ "hex-assignments",
  "hextree",
  "http-serde",
  "humantime",

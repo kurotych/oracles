@@ -1,6 +1,5 @@
 use crate::common;
 use anyhow::Context;
-use boosting_oracles::Assignment;
 use chrono::{DateTime, Duration, Utc};
 use file_store::{
     coverage::RadioHexSignalLevel,
@@ -13,6 +12,7 @@ use helium_crypto::PublicKeyBinary;
 use helium_proto::services::poc_mobile::{
     CoverageObjectValidity, OracleBoostingHexAssignment, SignalLevel,
 };
+use hex_assignments::Assignment;
 use mobile_config::boosted_hex_info::BoostedHexes;
 use mobile_verifier::{
     coverage::{

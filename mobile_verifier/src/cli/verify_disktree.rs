@@ -3,7 +3,7 @@ use std::{collections::HashMap, path::PathBuf};
 use hextree::disktree::DiskTreeMap;
 
 use crate::Settings;
-use boosting_oracles::{Assignment, Landtype};
+use hex_assignments::{Assignment, Landtype};
 
 #[derive(Debug, clap::Args)]
 pub struct Cmd {

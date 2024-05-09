@@ -1,4 +1,3 @@
-use boosting_oracles::{Assignment, BoostedHexAssignments, HexAssignments};
 use chrono::{DateTime, Utc};
 use file_store::file_sink::{FileSinkClient, Message as SinkMessage};
 use futures::{stream, StreamExt};
@@ -9,6 +8,7 @@ use helium_proto::{
     },
     Message,
 };
+use hex_assignments::{Assignment, BoostedHexAssignments, HexAssignments};
 use mobile_config::{
     boosted_hex_info::{BoostedHexInfo, BoostedHexInfoStream},
     client::{hex_boosting_client::HexBoostingInfoResolver, ClientError},

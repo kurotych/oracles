@@ -50,7 +50,7 @@ async-trait = {workspace = true}
 retainer = {workspace = true}
 uuid = {workspace = true}
 task-manager = {path = "../task_manager"}
-boosting-oracles = {path = "../boosting_oracles"}
+hex-assignments = {path = "../hex_assignments"}
 solana-sdk = {workspace = true}
 
 [dev-dependencies]

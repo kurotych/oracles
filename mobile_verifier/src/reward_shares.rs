@@ -706,7 +706,7 @@ mod test {
         speedtests_average::SpeedtestAverage,
         subscriber_location::SubscriberValidatedLocations,
     };
-    use boosting_oracles::{assignment::HexAssignments, Assignment};
+    use hex_assignments::{assignment::HexAssignments, Assignment};
 
     use chrono::{Duration, Utc};
     use file_store::speedtest::CellSpeedtest;
@@ -719,7 +719,7 @@ mod test {
     use std::collections::HashMap;
     use uuid::Uuid;
 
-    fn boosting_oracles_assignments_mock() -> HexAssignments {
+    fn hex_assignments_mock() -> HexAssignments {
         HexAssignments {
             footfall: Assignment::A,
             urbanized: Assignment::A,
@@ -1015,7 +1015,7 @@ mod test {
             signal_power: 0,
             coverage_claim_time: DateTime::<Utc>::MIN_UTC,
             inserted_at: DateTime::<Utc>::MIN_UTC,
-            assignments: boosting_oracles_assignments_mock(),
+            assignments: hex_assignments_mock(),
         }]
     }
 
@@ -1900,7 +1900,7 @@ mod test {
                             coverage_points: CoverageRewardPoints {
                                 boost_multiplier: NonZeroU32::new(1).unwrap(),
                                 coverage_points: dec!(10.0),
-                                hex_assignments: boosting_oracles_assignments_mock(),
+                                hex_assignments: hex_assignments_mock(),
                                 rank: None,
                             },
                             boosted_hex: BoostedHex {
