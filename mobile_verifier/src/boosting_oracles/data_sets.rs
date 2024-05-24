@@ -1,3 +1,4 @@
+use hextree::disktree::DiskTreeMap;
 use std::{
     collections::HashMap,
     path::{Path, PathBuf},
@@ -23,13 +24,14 @@ use task_manager::{ManagedTask, TaskManager};
 use tokio::{fs::File, io::AsyncWriteExt, time::Instant};
 
 use crate::{
-    boosting_oracles::assignment::HexAssignments,
     coverage::{NewCoverageObjectNotification, SignalLevel},
     Settings,
 };
+use hex_assignments::assignment::HexAssignments;
 
-use super::{
-    footfall::Footfall, landtype::Landtype, urbanization::Urbanization, HexAssignment, HexBoostData,
+use hex_assignments::HexBoostData;
+use hex_assignments::{
+    footfall::Footfall, landtype::Landtype, urbanization::Urbanization, HexAssignment,
 };
 
 #[async_trait::async_trait]
@@ -106,9 +108,70 @@ pub trait DataSet: HexAssignment + Send + Sync + 'static {
     }
 }
 
-pub struct DataSetDownloaderDaemon<A, B, C> {
+#[async_trait::async_trait]
+impl DataSet for Footfall {
+    const TYPE: DataSetType = DataSetType::Footfall;
+
+    fn timestamp(&self) -> Option<DateTime<Utc>> {
+        self.timestamp
+    }
+
+    fn update(&mut self, path: &Path, time_to_use: DateTime<Utc>) -> anyhow::Result<()> {
+        self.footfall = Some(DiskTreeMap::open(path)?);
+        self.timestamp = Some(time_to_use);
+        Ok(())
+    }
+
+    fn is_ready(&self) -> bool {
+        self.footfall.is_some()
+    }
+}
+
+#[async_trait::async_trait]
+impl DataSet for Landtype {
+    const TYPE: DataSetType = DataSetType::Landtype;
+
+    fn timestamp(&self) -> Option<DateTime<Utc>> {
+        self.timestamp
+    }
+
+    fn update(&mut self, path: &Path, time_to_use: DateTime<Utc>) -> anyhow::Result<()> {
+        self.landtype = Some(DiskTreeMap::open(path)?);
+        self.timestamp = Some(time_to_use);
+        Ok(())
+    }
+
+    fn is_ready(&self) -> bool {
+        self.landtype.is_some()
+    }
+}
+
+#[async_trait::async_trait]
+impl DataSet for Urbanization {
+    const TYPE: DataSetType = DataSetType::Urbanization;
+
+    fn timestamp(&self) -> Option<DateTime<Utc>> {
+        self.timestamp
+    }
+
+    fn update(&mut self, path: &Path, time_to_use: DateTime<Utc>) -> anyhow::Result<()> {
+        self.urbanized = Some(DiskTreeMap::open(path)?);
+        self.timestamp = Some(time_to_use);
+        Ok(())
+    }
+
+    fn is_ready(&self) -> bool {
+        self.urbanized.is_some()
+    }
+}
+
+pub fn is_hex_boost_data_ready(h: &HexBoostData) -> bool {
+    h.urbanization.is_ready() && h.footfall.is_ready() && h.landtype.is_ready()
+}
+
+pub struct DataSetDownloaderDaemon {
     pool: PgPool,
-    data_sets: HexBoostData<A, B, C>,
+    data_sets: HexBoostData,
     store: FileStore,
     oracle_boosting_sink: FileSinkClient,
     data_set_directory: PathBuf,
@@ -150,12 +213,7 @@ impl DataSetStatus {
     }
 }
 
-impl<A, B, C> ManagedTask for DataSetDownloaderDaemon<A, B, C>
-where
-    A: DataSet,
-    B: DataSet,
-    C: DataSet,
-{
+impl ManagedTask for DataSetDownloaderDaemon {
     fn start_task(
         self: Box<Self>,
         shutdown: triggered::Listener,
@@ -176,7 +234,7 @@ where
     }
 }
 
-impl DataSetDownloaderDaemon<Footfall, Landtype, Urbanization> {
+impl DataSetDownloaderDaemon {
     pub async fn create_managed_task(
         pool: PgPool,
         settings: &Settings,
@@ -198,11 +256,8 @@ impl DataSetDownloaderDaemon<Footfall, Landtype, Urbanization> {
         let urbanization = Urbanization::new();
         let footfall = Footfall::new();
         let landtype = Landtype::new();
-        let hex_boost_data = HexBoostData::builder()
-            .footfall(footfall)
-            .landtype(landtype)
-            .urbanization(urbanization)
-            .build()?;
+
+        let hex_boost_data = HexBoostData::new(footfall, landtype, urbanization);
 
         let data_set_downloader = Self::new(
             pool,
@@ -221,15 +276,10 @@ impl DataSetDownloaderDaemon<Footfall, Landtype, Urbanization> {
     }
 }
 
-impl<A, B, C> DataSetDownloaderDaemon<A, B, C>
-where
-    A: DataSet,
-    B: DataSet,
-    C: DataSet,
-{
+impl DataSetDownloaderDaemon {
     pub fn new(
         pool: PgPool,
-        data_sets: HexBoostData<A, B, C>,
+        data_sets: HexBoostData,
         store: FileStore,
         oracle_boosting_sink: FileSinkClient,
         data_set_directory: PathBuf,
@@ -268,7 +318,7 @@ where
         // hex assignments:
         let new_data_set =
             new_urbanized.is_some() || new_footfall.is_some() || new_landtype.is_some();
-        if self.data_sets.is_ready() && new_data_set {
+        if is_hex_boost_data_ready(&self.data_sets) && new_data_set {
             tracing::info!("Processing new data sets");
             set_all_oracle_boosting_assignments(
                 &self.pool,
@@ -326,7 +376,7 @@ where
 
         // Attempt to fill in any unassigned hexes. This is for the edge case in
         // which we shutdown before a coverage object updates.
-        if self.data_sets.is_ready() {
+        if is_hex_boost_data_ready(&self.data_sets) {
             set_unassigned_oracle_boosting_assignments(
                 &self.pool,
                 &self.data_sets,
@@ -342,7 +392,7 @@ where
                 _ = self.new_coverage_object_notification.await_new_coverage_object() => {
                     // If we see a new coverage object, we want to assign only those hexes
                     // that don't have an assignment
-                    if self.data_sets.is_ready() {
+                    if is_hex_boost_data_ready(&self.data_sets) {
                         set_unassigned_oracle_boosting_assignments(
                             &self.pool,
                             &self.data_sets,
@@ -585,7 +635,7 @@ pub struct AssignedCoverageObjects {
 impl AssignedCoverageObjects {
     pub async fn assign_hex_stream(
         stream: impl Stream<Item = sqlx::Result<UnassignedHex>>,
-        data_sets: &HexBoostData<impl HexAssignment, impl HexAssignment, impl HexAssignment>,
+        data_sets: &HexBoostData,
     ) -> anyhow::Result<Self> {
         let mut coverage_objs = HashMap::<uuid::Uuid, Vec<AssignedHex>>::new();
         let mut stream = pin!(stream);
@@ -677,10 +727,7 @@ pub struct UnassignedHex {
 }
 
 impl UnassignedHex {
-    fn assign(
-        self,
-        data_sets: &HexBoostData<impl HexAssignment, impl HexAssignment, impl HexAssignment>,
-    ) -> anyhow::Result<AssignedHex> {
+    fn assign(self, data_sets: &HexBoostData) -> anyhow::Result<AssignedHex> {
         let cell = hextree::Cell::try_from(self.hex)?;
         let assignments = HexAssignments::builder(cell)
             .footfall(&data_sets.footfall)
@@ -707,7 +754,7 @@ pub struct AssignedHex {
 
 pub async fn set_all_oracle_boosting_assignments(
     pool: &PgPool,
-    data_sets: &HexBoostData<impl HexAssignment, impl HexAssignment, impl HexAssignment>,
+    data_sets: &HexBoostData,
     file_sink: &FileSinkClient,
 ) -> anyhow::Result<()> {
     let assigned_coverage_objs =
@@ -719,7 +766,7 @@ pub async fn set_all_oracle_boosting_assignments(
 
 pub async fn set_unassigned_oracle_boosting_assignments(
     pool: &PgPool,
-    data_sets: &HexBoostData<impl HexAssignment, impl HexAssignment, impl HexAssignment>,
+    data_sets: &HexBoostData,
     file_sink: &FileSinkClient,
 ) -> anyhow::Result<()> {
     let assigned_coverage_objs = AssignedCoverageObjects::assign_hex_stream(
